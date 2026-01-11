@@ -65,10 +65,11 @@ http://localhost:8080/
 ---
 
 ## Результати виконання:
-<img width="1004" height="287" alt="image" src="https://github.com/user-attachments/assets/a49196da-35ba-4034-bd37-335a6ebd7b6a" />
-<img width="724" height="351" alt="image" src="https://github.com/user-attachments/assets/d6a8831d-196f-4995-a36f-9b97f990508a" />
-<img width="698" height="257" alt="image" src="https://github.com/user-attachments/assets/f53411bb-da88-497c-8281-885150825a54" />
-<img width="1004" height="256" alt="image" src="https://github.com/user-attachments/assets/b7426478-7883-4476-ac97-185128543c69" />
 
 
+<img width="1684" height="721" alt="Screenshot_10" src="https://github.com/user-attachments/assets/01b4fd7c-ae99-4fd0-81c5-94973566cc3c" />
+
+<img width="1919" height="254" alt="Screenshot_11" src="https://github.com/user-attachments/assets/b681402e-860b-4143-8c8f-449a2d3c0060" />
+
+<img width="1595" height="338" alt="Screenshot_12" src="https://github.com/user-attachments/assets/43c7731b-9ce7-45d3-a8d0-ebcd2feb1eba" />
 
