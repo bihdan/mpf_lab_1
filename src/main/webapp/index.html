@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="uk">
+<head>
+    <meta charset="utf-8">
+    <title>Книга відгуків</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+        h2 { border-bottom: 2px solid #eee; padding-bottom: 10px; }
+
+        /* Стилі форми */
+        form { display: flex; gap: 10px; margin-bottom: 2rem; background: #f9f9f9; padding: 15px; border-radius: 8px; }
+        input[name="author"] { width: 20%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        input[name="text"] { flex-grow: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 8px 20px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+
+        /* Стилі списку */
+        ul { list-style: none; padding: 0; }
+        li { margin-bottom: 15px; padding: 10px; border: 1px solid #eee; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .meta { color: #666; font-size: 0.85em; margin-bottom: 4px; }
+        .author { font-weight: bold; color: #333; }
+        .text { font-size: 1.1em; color: #000; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+
+<h2>Відгуки</h2>
+
+<form id="f">
+    <input name="author" placeholder="Ваше ім'я" required maxlength="64">
+    <input name="text" placeholder="Напишіть відгук..." required maxlength="1000">
+    <button type="submit">Надіслати</button>
+</form>
+
+<ul id="list"></ul>
+
+<script>
+    // Функція завантаження коментарів
+    async function load() {
+        try {
+            const response = await fetch('comments');
+            if (!response.ok) throw new Error(await response.text());
+
+            const data = await response.json();
+            const list = document.getElementById('list');
+
+            // Очищаємо список перед оновленням
+            list.innerHTML = '';
+
+            if (data.length === 0) {
+                list.innerHTML = '<li style="text-align:center; color:gray">Ще немає відгуків. Будьте першим!</li>';
+                return;
+            }
+
+            data.forEach(item => {
+                const li = document.createElement('li');
+                // Форматуємо дату (можна спростити, якщо сервер надсилає вже готовий рядок)
+                const dateStr = new Date(item.createdAt).toLocaleString('uk-UA');
+
+                li.innerHTML = `
+                    <div class="meta">
+                        <span class="author">${escapeHtml(item.author)}</span>
+                        &bull; ${dateStr}
+                    </div>
+                    <div class="text">${escapeHtml(item.text)}</div>
+                `;
+                list.appendChild(li);
+            });
+        } catch (e) {
+            console.error("Помилка завантаження:", e);
+        }
+    }
+
+    // Функція для безпечного виводу тексту (захист від XSS)
+    function escapeHtml(text) {
+        if (!text) return "";
+        return text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    // Обробка форми
+    document.getElementById('f').addEventListener('submit', async e => {
+        e.preventDefault();
+        const form = e.target;
+        const fd = new FormData(form);
+
+        try {
+            const response = await fetch('comments', { method: 'POST', body: new URLSearchParams(fd) });
+
+            if (response.ok) {
+                console.log("Response status:", response.status);
+                form.reset(); // Очистити поля
+                load();       // Перезавантажити список
+            } else {
+                alert('Помилка сервера: ' + (await response.text()));
+            }
+        } catch (err) {
+            console.error("Помилка відправки:", err);
+            alert("Не вдалося відправити запит");
+        }
+    });
+
+    // Завантажити при старті
+    load();
+</script>
+
+</body>
+</html>
