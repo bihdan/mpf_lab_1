@@ -51,12 +51,12 @@ ENTRYPOINT ["java","-jar","app.jar"]
 
 **Панель керування Render із налаштованими змінними середовища (БД, API ключі, порти):**
 
-<img width="1606" height="874" alt="image_2026-01-07_14-17-42" src="https://github.com/user-attachments/assets/4c4d1934-057c-42e8-817f-ae8177df4ca1" />
+<img width="1472" height="521" alt="532821968-4c4d1934-057c-42e8-817f-ae8177df4ca1" src="https://github.com/user-attachments/assets/5f122ef4-7d0a-4308-9c73-36c6643ac47d" />
 
 
-**Статус сервісу та публічний URL:**
+**Статус сервісу:**
 
-<img width="577" height="462" alt="image_2026-01-07_14-13-15 (2)" src="https://github.com/user-attachments/assets/df3dbb78-8ca5-45cd-a4a4-7abb2055673e" />
+<img width="577" height="300" alt="532822044-df3dbb78-8ca5-45cd-a4a4-7abb2055673e" src="https://github.com/user-attachments/assets/6f85b2bc-f6e3-4963-a2d2-859d84fdefbc" />
 
 
 ### 4.2. Логи запуску та роботи
@@ -82,19 +82,18 @@ ENTRYPOINT ["java","-jar","app.jar"]
 
 **Підтвердження реєстрації на пошті (Resend API):**
 
-<img width="799" height="112" alt="image_2026-01-07_14-13-15 (4)" src="https://github.com/user-attachments/assets/d0765ea6-4e1f-4313-ab21-d5ff7a83202a" />
-<img width="974" height="650" alt="image_2026-01-07_14-13-15 (3)" src="https://github.com/user-attachments/assets/db5ef88b-750f-4f84-a800-51494be4724e" />
-
+<img width="585" height="112" alt="532822293-d0765ea6-4e1f-4313-ab21-d5ff7a83202a" src="https://github.com/user-attachments/assets/1c477484-c049-41e2-88e0-9694c4a75ddd" />
+<img width="887" height="355" alt="532822893-db5ef88b-750f-4f84-a800-51494be4724e" src="https://github.com/user-attachments/assets/b1674274-6f73-4bef-8d86-8a3ce190ae45" />
 
 
 **Статус відправки листів у панелі Resend:**
 
-<img width="1443" height="415" alt="image_2026-01-07_14-17-12" src="https://github.com/user-attachments/assets/d5f3cd7e-4ce7-47cb-b735-f716bc74c059" />
+<img width="1114" height="415" alt="532822354-d5f3cd7e-4ce7-47cb-b735-f716bc74c059" src="https://github.com/user-attachments/assets/de906b59-b80e-45c7-b4b6-a92105cc8ecd" />
 
 
 **Перегляд даних користувачів у віддаленій БД через консоль IntelliJ IDEA:**
 
-<img width="1920" height="1030" alt="image_2026-01-06_23-52-45" src="https://github.com/user-attachments/assets/510d6c95-6bfa-4786-a513-536ce1dea7bd" />
+<img width="1920" height="910" alt="532825554-d5f3cd7e-4ce7-47cb-b735-f716bc74c059" src="https://github.com/user-attachments/assets/27d6dce3-c2ad-4ada-b345-b77cb70e23ad" />
 
 
 ---
