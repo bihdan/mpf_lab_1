@@ -14,7 +14,7 @@ public final class DbInit {
     }
 
     @PostConstruct
-    public static void init() {
+    public void init() {
         System.out.println("!!! Running database schema initialization !!!");
         try (Connection c = Db.get();
              Statement st = c.createStatement()) {

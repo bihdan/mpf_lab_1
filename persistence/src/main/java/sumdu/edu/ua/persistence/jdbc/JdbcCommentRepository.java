@@ -13,6 +13,7 @@ import java.sql.*;
 import java.time.Instant;
 import java.util.ArrayList;
 
+@Repository
 public class JdbcCommentRepository implements CommentRepositoryPort {
 
     private static final Logger log = LoggerFactory.getLogger(JdbcCommentRepository.class);
@@ -109,12 +110,15 @@ public class JdbcCommentRepository implements CommentRepositoryPort {
 
     @Override
     public void delete(long bookId, long commentId) {
-        String sql = "DELETE FROM comments WHERE id = ?";
         try (var c = Db.get();
-             var ps = c.prepareStatement(sql)) {
+             var ps = c.prepareStatement(
+                     "delete from comments where id=? and book_id=?")) {
             ps.setLong(1, commentId);
-            ps.executeUpdate();
-            log.info("DB: видалено коментар #{}", commentId);
+            ps.setLong(2, bookId);
+            int rows = ps.executeUpdate();
+            if (rows > 0) {
+                log.info("DB: deleted comment #{} for book {}", commentId, bookId);
+            }
         } catch (SQLException e) {
             throw new RuntimeException("DB delete error", e);
         }

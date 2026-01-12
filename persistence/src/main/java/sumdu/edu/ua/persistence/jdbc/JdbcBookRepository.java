@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.*;
 import java.util.ArrayList;
 
+@Repository
 public class JdbcBookRepository implements CatalogRepositoryPort {
 
     private static final Logger log = LoggerFactory.getLogger(JdbcBookRepository.class);

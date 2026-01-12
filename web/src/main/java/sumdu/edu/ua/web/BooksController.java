@@ -1,14 +1,19 @@
 package sumdu.edu.ua.web;
 
-import io.javalin.Javalin;
-import io.javalin.http.HttpStatus;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 import sumdu.edu.ua.core.domain.Book;
 import sumdu.edu.ua.core.domain.PageRequest;
 import sumdu.edu.ua.core.port.CatalogRepositoryPort;
 import sumdu.edu.ua.core.port.CommentRepositoryPort;
 
+import java.util.List;
 import java.util.Map;
 
+
+@Controller
+@RequestMapping("/books")
 public class BooksController {
 
     private final CatalogRepositoryPort bookRepo;
@@ -19,39 +24,28 @@ public class BooksController {
         this.commentRepo = commentRepo;
     }
 
-    public void registerRoutes(Javalin app) {
+    @GetMapping
+    @ResponseBody
+    public List<Book> getAllBooks(@RequestParam(required = false) String q,
+                                  @RequestParam(defaultValue = "id") String sortBy,
+                                  @RequestParam(defaultValue = "0") int page) {
+        PageRequest pageRequest = new PageRequest(page, 20, sortBy);
+        return bookRepo.search(q, pageRequest).getItems();
+    }
 
-        // GET /books — перегляд списку книг на сторінці
-        app.get("/books", ctx -> {
-            String q = ctx.queryParam("q");
-            String sortBy = ctx.queryParamAsClass("sortBy", String.class).getOrDefault("id");
-            int page = ctx.queryParamAsClass("page", Integer.class).getOrDefault(0);
+    @GetMapping("/{id}")
+    @ResponseBody
+    public Map<String, Object> getBook(@PathVariable long id) {
+        Book book = bookRepo.findById(id);
+        if (book == null) {
+            throw new IllegalArgumentException("Книгу не знайдено");
+        }
 
-            var booksPage = bookRepo.search(q, new PageRequest(page, 20, sortBy));
+        var comments = commentRepo.list(id, null, null, new PageRequest(0, 100, "id")).getItems();
 
-            ctx.render("books.jsp", Map.of(
-                    "books", booksPage.getItems(),
-                    "query", q != null ? q : ""
-            ));
-        });
-
-        // GET /books/{id} — детальна сторінка книги
-        app.get("/books/{id}", ctx -> {
-            long id = ctx.pathParamAsClass("id", Long.class).get();
-
-            Book book = bookRepo.findById(id);
-            if (book == null) {
-                ctx.status(HttpStatus.NOT_FOUND);
-                ctx.render("error.jsp", Map.of("message", "Книгу не знайдено"));
-                return;
-            }
-
-            var comments = commentRepo.list(id, null, null, new PageRequest(0, 100, "id")).getItems();
-
-            ctx.render("book-details.jsp", Map.of(
-                    "book", book,
-                    "comments", comments
-            ));
-        });
+        return Map.of(
+                "book", book,
+                "comments", comments
+        );
     }
 }
