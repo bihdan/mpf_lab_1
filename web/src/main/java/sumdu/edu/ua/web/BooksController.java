@@ -27,15 +27,13 @@ public class BooksController {
             @RequestParam(value = "page", defaultValue = "0") int page,
             Model model) {
 
-        // Використовуємо PageRequest для пошуку та сортування
         var booksPage = bookRepo.search(q, new PageRequest(page, 20, sortBy));
 
-        // Передаємо дані та стан фільтрів назад у шаблон
         model.addAttribute("books", booksPage.getItems());
         model.addAttribute("query", q != null ? q : "");
-        model.addAttribute("sortBy", sortBy); // Щоб зберегти вибір у <select>
-        model.addAttribute("total", booksPage.getTotal()); // Для пагінації
-        model.addAttribute("currentPage", page); // Для підсвічування сторінки
+        model.addAttribute("sortBy", sortBy);
+        model.addAttribute("total", booksPage.getTotal());
+        model.addAttribute("currentPage", page);
 
         return "books";
     }
@@ -54,15 +52,4 @@ public class BooksController {
         return "book-details";
     }
 
-    @GetMapping("/new")
-    public String showAddForm(Model model) {
-        model.addAttribute("bookForm", new Book());
-        return "book-add";
-    }
-
-    @PostMapping
-    public String addBook(@ModelAttribute("bookForm") Book book) {
-        bookRepo.add(book.getTitle(), book.getAuthor(), book.getPubYear());
-        return "redirect:/books";
-    }
 }

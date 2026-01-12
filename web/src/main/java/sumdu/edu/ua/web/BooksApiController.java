@@ -68,7 +68,7 @@ public class BooksApiController {
 
     // DELETE /api/comments/{id} — Видалення коментаря
     @DeleteMapping("/comments/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT) // Встановлює статус 204
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteComment(@PathVariable("id") Long id) {
         try {
             commentRepo.delete(0, id);
