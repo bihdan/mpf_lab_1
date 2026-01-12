@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="uk">
+<head>
+    <meta charset="utf-8">
+    <title>Коментарі до книги</title>
+    <style>
+        /* ЗМЕНШЕНИЙ МАСШТАБ */
+        body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.5; color: #333; background-color: #f4f7f6; margin: 0; padding: 25px; display: flex; justify-content: center; }
+        .container { background: #fff; padding: 35px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); width: 100%; max-width: 750px; }
+
+        .book-info { text-align: center; margin-bottom: 30px; border-bottom: 1px solid #eee; padding-bottom: 20px; }
+        .book-info h1 { font-size: 2.1em; color: #2c3e50; margin: 0; }
+        .book-info p { font-style: italic; color: #7f8c8d; font-size: 1.1em; margin-top: 8px; }
+
+        h3 { color: #2c3e50; font-size: 1.4em; margin-top: 25px; margin-bottom: 15px; border-left: 4px solid #3498db; padding-left: 12px; }
+
+        ul { list-style: none; padding: 0; }
+        li {
+            background: #fcfcfc; border: 1px solid #eee; padding: 18px;
+            margin-bottom: 12px; border-radius: 8px; display: flex;
+            justify-content: space-between; align-items: center;
+        }
+
+        .empty-state {
+            display: block; text-align: center; padding: 30px; color: #7f8c8d;
+            background: #f9f9f9; border: 2px dashed #ddd; border-radius: 10px; font-size: 0.95em;
+        }
+
+        .comment-content { flex-grow: 1; font-size: 0.95em; }
+        .comment-meta { font-size: 0.8em; color: #95a5a6; display: block; margin-top: 6px; }
+
+        .btn-delete {
+            background: #e74c3c; color: white; border: none; padding: 8px 16px;
+            border-radius: 5px; cursor: pointer; font-size: 0.9em; font-weight: bold;
+            margin-left: 15px; transition: background 0.2s;
+        }
+        .btn-delete:hover { background: #c0392b; }
+
+        form { margin-top: 30px; padding: 25px; background: #f9f9f9; border-radius: 8px; border: 1px solid #eee; }
+        label { display: block; font-weight: bold; margin-bottom: 6px; color: #34495e; font-size: 0.95em; }
+        input, textarea { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; font-family: inherit; box-sizing: border-box; }
+        textarea { height: 90px; }
+
+        button[type="submit"] { background: #3498db; color: white; border: none; padding: 10px 25px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 15px; }
+
+        p a { display: inline-block; margin-top: 15px; text-decoration: none; color: #3498db; font-weight: bold; font-size: 0.95em; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div id="book-info" class="book-info">Завантаження...</div>
+    <h3>Коментарі</h3>
+    <ul id="comments-list"></ul>
+    <form id="comment-form">
+        <input type="hidden" name="bookId" id="bookId">
+        <p><label>Автор:</label><input name="author" placeholder="Ваше ім'я" required></p>
+        <p><label>Коментар:</label><textarea name="text" placeholder="Текст коментаря" required></textarea></p>
+        <button type="submit">Додати коментар</button>
+    </form>
+    <p><a href="/books.html">← Повернутись до списку</a></p>
+</div>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const bookId = urlParams.get("bookId");
+
+    async function loadComments() {
+        if (!bookId) return;
+        document.getElementById("bookId").value = bookId;
+        try {
+            const res = await fetch(`/api/books/${bookId}`);
+            const data = await res.json();
+            const book = data.book;
+            const comments = data.comments || [];
+
+            document.getElementById("book-info").innerHTML = `<h1>${book.title}</h1><p>${book.author} (${book.pubYear} р.)</p>`;
+            const ul = document.getElementById("comments-list");
+
+            if (comments.length === 0) {
+                ul.innerHTML = `<li class="empty-state">Коментарів ще немає.</li>`;
+            } else {
+                ul.innerHTML = "";
+                const now = new Date();
+                comments.forEach(c => {
+                    const li = document.createElement("li");
+                    const createdAt = new Date(c.createdAt);
+                    const isDeletable = (now - createdAt) < (24 * 60 * 60 * 1000);
+                    li.innerHTML = `
+                        <div class="comment-content">
+                            <b>${c.author}:</b> ${c.text}
+                            <span class="comment-meta">Опубліковано: ${createdAt.toLocaleString()}</span>
+                        </div>
+                        ${isDeletable ? `<button class="btn-delete" onclick="deleteComment(${c.id})">Видалити</button>` : ''}
+                    `;
+                    ul.appendChild(li);
+                });
+            }
+        } catch (err) { console.error(err); }
+    }
+
+    async function deleteComment(id) {
+        if (!confirm("Видалити?")) return;
+        const res = await fetch(`/api/comments/${id}`, { method: 'DELETE' });
+        if (res.ok) await loadComments();
+    }
+
+    document.getElementById("comment-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const res = await fetch("/api/comments", {
+            method: "POST",
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(Object.fromEntries(formData))
+        });
+        if (res.ok) { e.target.reset(); await loadComments(); }
+    });
+
+    loadComments();
+</script>
+</body>
+</html>

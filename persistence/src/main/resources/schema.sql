@@ -14,6 +14,6 @@ create table if not exists comments (
                                         book_id bigint not null,
                                         author varchar(64) not null,
     text varchar(1000) not null,
-    created_at timestamp not null default current_timestamp,
+    created_at timestamp not null default CURRENT_TIMESTAMP,
     constraint fk_book foreign key (book_id) references books(id) on delete cascade
     );

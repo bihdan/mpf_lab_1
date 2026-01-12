@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="uk">
+<head>
+    <meta charset="utf-8">
+    <title>Каталог книг</title>
+    <style>
+        /* ЗМЕНШЕНИЙ МАСШТАБ */
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f7f6; padding: 25px; display: flex; flex-direction: column; align-items: center; margin: 0; }
+        .container { width: 100%; max-width: 700px; } /* Було 800px */
+        h1 { color: #2c3e50; text-align: center; font-size: 2em; margin-bottom: 30px; } /* Було 2.5em */
+
+        .controls { display: flex; gap: 8px; margin-bottom: 25px; justify-content: center; }
+        .search-input { flex-grow: 1; padding: 10px 15px; border: 1px solid #ddd; border-radius: 6px; outline: none; font-size: 14px; }
+        .sort-select { padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: white; font-size: 14px; cursor: pointer; }
+        .btn { padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; transition: background 0.2s; }
+        .btn:hover { background: #2980b9; }
+
+        ul { list-style: none; padding: 0; }
+        li { background: #fff; margin: 15px 0; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.05); transition: transform 0.2s; }
+        li:hover { transform: translateY(-2px); }
+
+        .empty-state {
+            background: #fff; padding: 30px; border-radius: 10px; text-align: center;
+            color: #7f8c8d; border: 2px dashed #3498db; font-size: 1em;
+        }
+
+        a {
+            display: block; padding: 20px 25px; text-decoration: none;
+            color: #34495e; font-weight: 500; border-left: 5px solid #3498db;
+            border-radius: 10px; font-size: 1em;
+        }
+
+        .pagination { margin-top: 30px; text-align: center; color: #2c3e50; font-weight: bold; font-size: 14px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Каталог книг</h1>
+    <div class="controls">
+        <input type="text" id="search-q" class="search-input" placeholder="Пошук...">
+        <select id="sort-by" class="sort-select">
+            <option value="id">За ID</option>
+            <option value="title">За назвою</option>
+            <option value="author">За автором</option>
+            <option value="pubYear">За роком</option>
+        </select>
+        <button onclick="applyFilters()" class="btn">Шукати</button>
+    </div>
+    <ul id="book-list"></ul>
+    <div class="pagination">
+        <span id="page-info">Сторінка 1</span>
+    </div>
+</div>
+
+<script>
+    let currentPage = 0;
+    async function loadBooks() {
+        const query = document.getElementById('search-q').value;
+        const sortBy = document.getElementById('sort-by').value;
+        try {
+            const response = await fetch(`/api/books?q=${encodeURIComponent(query)}&page=${currentPage}&sortBy=${sortBy}`);
+            const data = await response.json();
+            const books = data.items || data;
+            const ul = document.getElementById('book-list');
+            if (books.length === 0) {
+                ul.innerHTML = `<li class="empty-state">🔍 Нічого не знайдено.</li>`;
+            } else {
+                ul.innerHTML = "";
+                books.forEach(b => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<a href="/book-comments.html?bookId=${b.id}">${b.title} — ${b.author} (${b.pubYear})</a>`;
+                    ul.appendChild(li);
+                });
+            }
+        } catch (err) { console.error(err); }
+    }
+    function applyFilters() { currentPage = 0; loadBooks(); }
+    loadBooks();
+</script>
+</body>
+</html>
