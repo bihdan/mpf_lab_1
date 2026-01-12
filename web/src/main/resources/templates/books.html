@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header}">
+    <title th:text="#{title.books}">Каталог</title>
+</head>
+<style>
+    body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f7f6; display: flex; flex-direction: column; align-items: center; padding: 40px; margin: 0; }
+    h1 { color: #2c3e50; margin-bottom: 30px; font-size: 2.5em; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
+    .search-container { width: 100%; max-width: 700px; margin-bottom: 25px; display: flex; gap: 10px; }
+    .search-input, .sort-select { padding: 12px; border: 2px solid #ddd; border-radius: 8px; outline: none; font-family: inherit; }
+    .search-input { flex-grow: 1; }
+    .search-button { padding: 12px 25px; background: #3498db; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+
+    .btn-new-book {
+        display: inline-block;
+        background-color: #27ae60;
+        color: white;
+        padding: 12px 25px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: bold;
+        margin-bottom: 20px;
+        transition: background 0.3s;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .btn-new-book:hover { background-color: #219150; }
+
+    ul { list-style: none; padding: 0; width: 100%; max-width: 600px; }
+    li { background: #fff; margin: 15px 0; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    a.book-link { display: block; padding: 20px; text-decoration: none; color: #34495e; font-weight: 500; border-left: 5px solid #3498db; border-radius: 10px; }
+    .pagination { margin-top: 15px; display: flex; gap: 15px; align-items: center; }
+    .page-link { text-decoration: none; color: #3498db; font-weight: bold; padding: 10px 15px; border: 1px solid #3498db; border-radius: 8px; }
+</style>
+<body>
+
+<h1 th:text="#{title.books}">Каталог книг</h1>
+
+<form method="get" th:action="@{/books}" class="search-container">
+    <input type="text" name="q" class="search-input" th:placeholder="#{placeholder.search}" th:value="${query}">
+    <select name="sortBy" class="sort-select">
+        <option value="id" th:selected="${sortBy == 'id'}" th:text="#{label.sort.id}">За ID</option>
+        <option value="title" th:selected="${sortBy == 'title'}" th:text="#{label.sort.title}">За назвою</option>
+        <option value="author" th:selected="${sortBy == 'author'}" th:text="#{label.sort.author}">За автором</option>
+        <option value="pub_year" th:selected="${sortBy == 'pub_year'}" th:text="#{label.sort.year}">За роком</option>
+    </select>
+    <button type="submit" class="search-button" th:text="#{label.search}">Шукати</button>
+</form>
+
+<p th:if="${#lists.isEmpty(books)}" th:text="#{label.noBooks}" style="color: #e74c3c; font-weight: bold;">
+    На жаль, книг не знайдено.
+</p>
+
+<ul>
+    <li th:each="book : ${books}">
+        <a th:href="@{/comments(bookId=${book.id})}" class="book-link">
+            <span th:text="${book.title}">Назва</span> —
+            <span th:text="${book.author}">Автор</span>
+            (<span th:text="${book.pubYear}">2024</span>)
+        </a>
+    </li>
+</ul>
+
+<div style="margin-top: 20px;">
+    <a th:href="@{/books/new}" class="btn-new-book" th:text="#{label.addBook}">Додати книгу</a>
+</div>
+
+<div class="pagination" th:if="${total > 0}">
+    <a th:if="${currentPage > 0}"
+       th:href="@{/books(q=${query}, sortBy=${sortBy}, page=${currentPage - 1})}"
+       class="page-link" th:text="#{label.prev}">← Назад</a>
+
+    <span style="font-weight: bold;" th:text="|#{label.page} ${currentPage + 1}|">Сторінка 1</span>
+
+    <a th:if="${(currentPage + 1) * 20 < total}"
+       th:href="@{/books(q=${query}, sortBy=${sortBy}, page=${currentPage + 1})}"
+       class="page-link" th:text="#{label.next}">Вперед →</a>
+</div>
+
+</body>
+</html>
