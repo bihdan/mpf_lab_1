@@ -2,6 +2,7 @@ package sumdu.edu.ua.core.service;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import sumdu.edu.ua.core.domain.User;
 import sumdu.edu.ua.core.port.UserRepositoryPort;
 import java.util.UUID;
@@ -26,10 +27,13 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("Користувача з ID " + id + " не знайдено"));
     }
 
-    public void register(String email, String password, String nickname) {
+    @Transactional
+    public String register(String email, String password, String nickname) {
         if (userRepository.findByEmail(email).isPresent()) {
             throw new RuntimeException("Користувач з таким email вже існує");
         }
+
+        String token = UUID.randomUUID().toString();
 
         User u = new User();
         u.setEmail(email);
@@ -37,11 +41,14 @@ public class UserService {
         u.setNickname(nickname);
         u.setRole("USER");
         u.setVerified(false);
-        u.setVerificationToken(UUID.randomUUID().toString());
+        u.setVerificationToken(token);
 
         userRepository.save(u);
+
+        return token;
     }
 
+    @Transactional
     public boolean verifyAccount(String token) {
         return userRepository.findByVerificationToken(token)
                 .map(u -> {

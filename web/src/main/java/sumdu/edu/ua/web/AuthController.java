@@ -7,14 +7,17 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import sumdu.edu.ua.core.service.UserService;
 import sumdu.edu.ua.web.dto.RegisterUserDto;
+import sumdu.edu.ua.web.mail.MailService; // Імпорт нашого сервісу
 
 @Controller
 public class AuthController {
 
     private final UserService userService;
+    private final MailService mailService;
 
-    public AuthController(UserService userService) {
+    public AuthController(UserService userService, MailService mailService) {
         this.userService = userService;
+        this.mailService = mailService;
     }
 
     @GetMapping("/login")
@@ -39,7 +42,10 @@ public class AuthController {
         }
 
         try {
-            userService.register(dto.getEmail(), dto.getPassword(), dto.getNickname());
+            String token = userService.register(dto.getEmail(), dto.getPassword(), dto.getNickname());
+
+            mailService.sendVerificationEmail(dto.getEmail(), token);
+
             return "redirect:/login?registered";
         } catch (RuntimeException ex) {
             model.addAttribute("error", ex.getMessage());

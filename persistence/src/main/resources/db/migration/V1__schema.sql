@@ -1,12 +1,12 @@
 CREATE TABLE books (
-                       id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                       id BIGSERIAL PRIMARY KEY,
                        title VARCHAR(255) NOT NULL,
                        author VARCHAR(255),
                        pub_year INT
 );
 
 CREATE TABLE comments (
-                          id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                          id BIGSERIAL PRIMARY KEY,
                           text TEXT,
                           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                           book_id BIGINT,
