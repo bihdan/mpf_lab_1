@@ -11,20 +11,25 @@ import sumdu.edu.ua.core.domain.PageRequest;
 import sumdu.edu.ua.core.port.CatalogRepositoryPort;
 import sumdu.edu.ua.core.port.CommentRepositoryPort;
 import sumdu.edu.ua.core.domain.Comment;
+import sumdu.edu.ua.core.service.CommentService; // Додано імпорт сервісу
 
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
-@PreAuthorize("hasRole('ADMIN')") // Весь API доступний тільки для ADMIN
+@PreAuthorize("hasRole('ADMIN')")
 public class BooksApiController {
     private static final Logger log = LoggerFactory.getLogger(BooksApiController.class);
     private final CatalogRepositoryPort bookRepo;
     private final CommentRepositoryPort commentRepo;
+    private final CommentService commentService; // Впроваджуємо сервіс
 
-    public BooksApiController(CatalogRepositoryPort bookRepo, CommentRepositoryPort commentRepo) {
+    public BooksApiController(CatalogRepositoryPort bookRepo,
+                              CommentRepositoryPort commentRepo,
+                              CommentService commentService) {
         this.bookRepo = bookRepo;
         this.commentRepo = commentRepo;
+        this.commentService = commentService;
     }
 
     @GetMapping("/books")
@@ -33,7 +38,6 @@ public class BooksApiController {
             @RequestParam(value = "sortBy", defaultValue = "id") String sortBy,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "20") int size) {
-
         return bookRepo.search(q, new PageRequest(page, size, sortBy));
     }
 
@@ -59,7 +63,7 @@ public class BooksApiController {
             String author = (String) body.get("author");
             String text = (String) body.get("text");
 
-            commentRepo.add(bookId, author, text);
+            commentService.add(bookId, author, text);
         } catch (Exception e) {
             log.error("Помилка при додаванні коментаря через API", e);
             throw e;
@@ -76,7 +80,7 @@ public class BooksApiController {
                     .findFirst()
                     .orElseThrow(() -> new RuntimeException("Comment not found"));
 
-            commentRepo.delete(comment.getBook().getId(), id, comment.getCreatedAt());
+            commentService.delete(comment.getBook().getId(), id, comment.getCreatedAt());
         } catch (Exception e) {
             log.error("Помилка при видаленні коментаря", e);
             throw e;

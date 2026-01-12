@@ -8,6 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+import sumdu.edu.ua.core.exceptions.CommentTooOldException;
+import sumdu.edu.ua.core.exceptions.CommentValidationException;
+import sumdu.edu.ua.core.exceptions.InvalidCommentDeleteException;
 
 import java.util.Map;
 
@@ -54,5 +57,20 @@ public class GlobalExceptionHandler {
             return;
         }
         log.warn("Resource not found: {}", ex.getResourcePath());
+    }
+
+    @ExceptionHandler({
+            CommentValidationException.class,
+            CommentTooOldException.class,
+            InvalidCommentDeleteException.class
+    })
+    public ResponseEntity<?> handleBusinessExceptions(RuntimeException e) {
+        log.warn("Business logic error: {}", e.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(Map.of(
+                        "error", e.getMessage(),
+                        "status", HttpStatus.BAD_REQUEST.value()
+                ));
     }
 }

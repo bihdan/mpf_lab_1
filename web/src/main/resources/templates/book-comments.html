@@ -9,6 +9,17 @@
     h1, h3 { color: #2c3e50; }
     hr { border: 0; height: 1px; background: #eee; margin: 25px 0; }
 
+    /* Стиль для повідомлення про помилку */
+    .error-alert {
+        background-color: #fdeaea;
+        color: #e74c3c;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #e74c3c;
+        margin-bottom: 25px;
+        font-weight: bold;
+    }
+
     ul.comment-list { list-style-type: none; padding: 0; }
     li.comment-item { background: #fdfdfd; border: 1px solid #eee; padding: 20px; margin-bottom: 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: flex-start; }
     .comment-author { font-weight: bold; color: #2980b9; text-decoration: none; }
@@ -42,6 +53,11 @@
         <p style="color: #7f8c8d; font-style: italic;" th:text="|${book.author}, ${book.pubYear}|">Автор, Рік</p>
     </div>
     <hr>
+
+    <div th:if="${errorMessage}" class="error-alert" th:text="${errorMessage}">
+        Помилка бізнес-логіки
+    </div>
+
     <h3 th:text="#{title.comments}">Коментарі</h3>
 
     <ul class="comment-list">
@@ -52,10 +68,12 @@
                 <span class="comment-meta" th:text="|(${#temporals.format(c.createdAt, 'dd.MM.yyyy HH:mm')})|"></span>
             </div>
 
-            <form th:if="${c.createdAt != null and c.createdAt.plusHours(24).isAfter(T(java.time.LocalDateTime).now())}"
+            <form th:if="${c.createdAt != null}"
                   th:action="@{/comments/delete}" method="post" style="margin: 0;">
                 <input type="hidden" name="bookId" th:value="${book.id}">
                 <input type="hidden" name="commentId" th:value="${c.id}">
+                <input type="hidden" name="createdAt" th:value="${c.createdAt}">
+
                 <button sec:authorize="hasRole('ADMIN')" type="submit" class="delete-btn" th:text="#{label.delete}">Видалити</button>
             </form>
         </li>

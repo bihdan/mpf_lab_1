@@ -1,15 +1,21 @@
 package sumdu.edu.ua.web;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import sumdu.edu.ua.core.domain.Book;
 import sumdu.edu.ua.core.domain.Comment;
 import sumdu.edu.ua.core.domain.PageRequest;
+import sumdu.edu.ua.core.exceptions.CommentTooOldException;
+import sumdu.edu.ua.core.exceptions.CommentValidationException;
+import sumdu.edu.ua.core.exceptions.InvalidCommentDeleteException;
 import sumdu.edu.ua.core.port.CatalogRepositoryPort;
 import sumdu.edu.ua.core.port.CommentRepositoryPort;
 import sumdu.edu.ua.core.service.CommentService;
 
+import java.time.Instant;
 import java.util.List;
 
 @Controller
@@ -49,24 +55,26 @@ public class CommentsController {
     @PostMapping
     public String add(@RequestParam("bookId") long bookId,
                       @RequestParam("author") String author,
-                      @RequestParam("text") String text) {
-
-        commentService.add(bookId, author.trim(), text.trim());
+                      @RequestParam("text") String text,
+                      RedirectAttributes redirectAttributes) {
+        try {
+            commentService.add(bookId, author, text);
+        } catch (CommentValidationException | InvalidCommentDeleteException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
         return "redirect:/comments?bookId=" + bookId;
     }
 
     @PostMapping("/delete")
-    public String delete(@RequestParam("bookId") long bookId,
-                         @RequestParam("commentId") long commentId) {
-
-        Comment comment = commentRepo.list(bookId, null, null, new PageRequest(0, 100, "id"))
-                .getItems().stream()
-                .filter(c -> c.getId().equals(commentId))
-                .findFirst()
-                .orElse(null);
-
-        if (comment != null) {
-            commentService.delete(bookId, commentId, comment.getCreatedAt());
+    public String delete(
+            @RequestParam("bookId") long bookId,
+            @RequestParam("commentId") long commentId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant createdAt,
+            RedirectAttributes redirectAttributes) {
+        try {
+            commentService.delete(bookId, commentId, createdAt);
+        } catch (CommentTooOldException | InvalidCommentDeleteException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
 
         return "redirect:/comments?bookId=" + bookId;

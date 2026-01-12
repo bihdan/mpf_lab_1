@@ -6,7 +6,8 @@ import sumdu.edu.ua.core.port.CommentRepositoryPort;
 import sumdu.edu.ua.persistence.jpa.repo.BookJpaRepository;
 import sumdu.edu.ua.persistence.jpa.repo.CommentJpaRepository;
 import sumdu.edu.ua.persistence.jpa.repo.UserJpaRepository;
-import java.time.LocalDateTime;
+
+import java.time.Instant;
 import java.util.List;
 
 @Repository
@@ -14,6 +15,7 @@ public class JpaCommentRepositoryAdapter implements CommentRepositoryPort {
     private final CommentJpaRepository repo;
     private final BookJpaRepository bookRepo;
     private final UserJpaRepository userRepo;
+
     public JpaCommentRepositoryAdapter(CommentJpaRepository repo,
                                        BookJpaRepository bookRepo,
                                        UserJpaRepository userRepo) {
@@ -25,23 +27,21 @@ public class JpaCommentRepositoryAdapter implements CommentRepositoryPort {
     @Override
     public void add(long bookId, String username, String text) {
         Comment comment = new Comment();
-
         Book book = bookRepo.findById(bookId)
                 .orElseThrow(() -> new RuntimeException("Книгу не знайдено"));
-
         User user = userRepo.findByEmail(username)
-                .orElseThrow(() -> new RuntimeException("Користувача з email '" + username + "' не знайдено"));
+                .orElseThrow(() -> new RuntimeException("Користувача не знайдено"));
 
         comment.setBook(book);
         comment.setUser(user);
         comment.setText(text);
-        comment.setCreatedAt(LocalDateTime.now());
+        comment.setCreatedAt(Instant.now());
 
         repo.save(comment);
     }
 
     @Override
-    public Page<Comment> list(long bookId, String author, LocalDateTime since, PageRequest request) {
+    public Page<Comment> list(long bookId, String author, Instant since, PageRequest request) {
         List<Comment> all = repo.findByBookIdOrderByCreatedAtDesc(bookId);
         int from = request.getPage() * request.getSize();
         int to = Math.min(from + request.getSize(), all.size());
@@ -50,7 +50,7 @@ public class JpaCommentRepositoryAdapter implements CommentRepositoryPort {
     }
 
     @Override
-    public void delete(long bookId, long commentId, LocalDateTime createdAt) {
+    public void delete(long bookId, long commentId) {
         repo.deleteById(commentId);
     }
 
