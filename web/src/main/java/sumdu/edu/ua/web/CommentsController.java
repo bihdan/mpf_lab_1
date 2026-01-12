@@ -20,13 +20,14 @@ public class CommentsController {
     private final CatalogRepositoryPort bookRepo;
     private final CommentService commentService;
 
-    public CommentsController(CommentRepositoryPort commentRepo, CatalogRepositoryPort bookRepo) {
+    public CommentsController(CommentRepositoryPort commentRepo,
+                              CatalogRepositoryPort bookRepo,
+                              CommentService commentService) {
         this.commentRepo = commentRepo;
         this.bookRepo = bookRepo;
-        this.commentService = new CommentService(commentRepo);
+        this.commentService = commentService;
     }
 
-    // GET /comments — перегляд коментарів до книги
     @GetMapping
     public String list(@RequestParam("bookId") long bookId, Model model) {
         Book book = bookRepo.findById(bookId);
@@ -42,28 +43,25 @@ public class CommentsController {
         model.addAttribute("book", book);
         model.addAttribute("comments", comments);
 
-        return "book-comments"; // Відкриває templates/book-comments.html
+        return "book-comments";
     }
 
-    // POST /comments — додавання нового коментаря
     @PostMapping
     public String add(@RequestParam("bookId") long bookId,
                       @RequestParam("author") String author,
                       @RequestParam("text") String text) {
 
         commentService.add(bookId, author.trim(), text.trim());
-
         return "redirect:/comments?bookId=" + bookId;
     }
 
-    // POST /comments/delete — видалення коментаря
     @PostMapping("/delete")
     public String delete(@RequestParam("bookId") long bookId,
                          @RequestParam("commentId") long commentId) {
 
         Comment comment = commentRepo.list(bookId, null, null, new PageRequest(0, 100, "id"))
                 .getItems().stream()
-                .filter(c -> c.getId() == commentId)
+                .filter(c -> c.getId().equals(commentId))
                 .findFirst()
                 .orElse(null);
 

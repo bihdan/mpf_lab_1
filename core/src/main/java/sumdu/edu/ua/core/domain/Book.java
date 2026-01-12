@@ -1,15 +1,29 @@
 package sumdu.edu.ua.core.domain;
 
+import jakarta.persistence.*;
+import java.util.List;
+
+@Entity
+@Table(name = "books")
 public class Book {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
     private String title;
+
     private String author;
-    private int pubYear;
 
-    public Book() {
-    }
+    @Column(name = "pub_year")
+    private Integer pubYear;
 
-    public Book(Long id, String title, String author, int pubYear) {
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Comment> comments;
+
+    public Book() {}
+
+    public Book(Long id, String title, String author, Integer pubYear) {
         this.id = id;
         this.title = title;
         this.author = author;
@@ -18,13 +32,12 @@ public class Book {
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
-
     public String getAuthor() { return author; }
     public void setAuthor(String author) { this.author = author; }
-
-    public int getPubYear() { return pubYear; }
-    public void setPubYear(int pubYear) { this.pubYear = pubYear; }
+    public Integer getPubYear() { return pubYear; }
+    public void setPubYear(Integer pubYear) { this.pubYear = pubYear; }
+    public List<Comment> getComments() { return comments; }
+    public void setComments(List<Comment> comments) { this.comments = comments; }
 }

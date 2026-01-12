@@ -1,4 +1,3 @@
--- Таблиця книг
 CREATE TABLE books (
                        id BIGINT AUTO_INCREMENT PRIMARY KEY,
                        title VARCHAR(255) NOT NULL,
@@ -6,7 +5,6 @@ CREATE TABLE books (
                        pub_year INT
 );
 
--- Базова таблиця коментарів
 CREATE TABLE comments (
                           id BIGINT AUTO_INCREMENT PRIMARY KEY,
                           text TEXT,

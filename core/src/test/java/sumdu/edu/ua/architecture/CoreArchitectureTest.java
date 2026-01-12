@@ -14,9 +14,15 @@ public class CoreArchitectureTest {
         noClasses()
                 .that().resideInAPackage("..core..")
                 .should().dependOnClassesThat()
-                .resideInAPackage("..persistence..")
-                .orShould().dependOnClassesThat()
-                .resideInAPackage("..web..")
+                .resideInAnyPackage("sumdu.edu.ua.persistence..", "sumdu.edu.ua.web..")
+                .because("Core must be independent of local persistence and web implementations")
+                .check(imported);
+
+        noClasses()
+                .that().resideInAPackage("..core..")
+                .should().dependOnClassesThat()
+                .resideInAPackage("java.sql..")
+                .because("Direct JDBC usage (java.sql) is forbidden in core after switching to JPA")
                 .check(imported);
     }
 }

@@ -1,5 +1,6 @@
 package sumdu.edu.ua.web;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -20,14 +21,16 @@ public class BookFormController {
     }
 
     @GetMapping("/new")
+    @PreAuthorize("hasRole('ADMIN')")
     public String showAddForm(Model model) {
         model.addAttribute("bookForm", new Book());
         return "book-add";
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public String addBook(@ModelAttribute("bookForm") Book book) {
-        Book savedBook = bookRepo.add(book.getTitle(), book.getAuthor(), book.getPubYear());
+        Book savedBook = bookRepo.save(book);
 
         try {
             mailService.sendNewBookEmail(savedBook);

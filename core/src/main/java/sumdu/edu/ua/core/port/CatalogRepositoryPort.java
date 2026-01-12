@@ -5,7 +5,8 @@ import sumdu.edu.ua.core.domain.Page;
 import sumdu.edu.ua.core.domain.PageRequest;
 
 public interface CatalogRepositoryPort {
-    Page<Book> search(String query, PageRequest request);
-    Book findById(long id);
-    Book add(String title, String author, int pub_year);
+    Book findById(Long id);
+    Page<Book> search(String query, PageRequest pageRequest);
+    Book save(Book book);
+    void delete(Long id);
 }

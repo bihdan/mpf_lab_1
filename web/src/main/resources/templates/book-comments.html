@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:replace="~{fragments/header :: header}">
     <title th:text="|${book.title} - #{title.comments}|">Коментарі</title>
 </head>
@@ -11,7 +11,8 @@
 
     ul.comment-list { list-style-type: none; padding: 0; }
     li.comment-item { background: #fdfdfd; border: 1px solid #eee; padding: 20px; margin-bottom: 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: flex-start; }
-    .comment-author { font-weight: bold; color: #2980b9; }
+    .comment-author { font-weight: bold; color: #2980b9; text-decoration: none; }
+    .comment-author:hover { text-decoration: underline; }
     .comment-meta { font-size: 0.85em; color: #999; display: block; margin-top: 5px; }
 
     .form-group { margin-bottom: 20px; }
@@ -46,34 +47,42 @@
     <ul class="comment-list">
         <li th:each="c : ${comments}" class="comment-item">
             <div class="comment-content">
-                <span class="comment-author" th:text="${c.author}">Автор</span>:
-                <span th:text="${c.text}">Текст</span>
+                <a class="comment-author" th:href="@{/users/{id}/comments(id=${c.user.id})}"
+                   th:text="${c.user.nickname}">Автор</a>: <span th:text="${c.text}">Текст</span>
                 <span class="comment-meta" th:text="|(${#temporals.format(c.createdAt, 'dd.MM.yyyy HH:mm')})|"></span>
             </div>
 
-            <form th:if="${c.createdAt != null and c.createdAt.plusSeconds(86400).isAfter(T(java.time.Instant).now())}"
+            <form th:if="${c.createdAt != null and c.createdAt.plusHours(24).isAfter(T(java.time.LocalDateTime).now())}"
                   th:action="@{/comments/delete}" method="post" style="margin: 0;">
                 <input type="hidden" name="bookId" th:value="${book.id}">
                 <input type="hidden" name="commentId" th:value="${c.id}">
-                <button type="submit" class="delete-btn" th:text="#{label.delete}">Видалити</button>
+                <button sec:authorize="hasRole('ADMIN')" type="submit" class="delete-btn" th:text="#{label.delete}">Видалити</button>
             </form>
         </li>
     </ul>
 
     <hr>
-    <h3 th:text="#{title.addComment}">Додати коментар</h3>
-    <form th:action="@{/comments}" method="post">
-        <input type="hidden" name="bookId" th:value="${book.id}">
-        <div class="form-group">
-            <label th:text="#{label.author}">Автор:</label>
-            <input type="text" name="author" class="styled-input" required th:placeholder="#{placeholder.name}">
-        </div>
-        <div class="form-group">
-            <label th:text="#{label.commentText}">Коментар:</label>
-            <textarea name="text" class="styled-input" required th:placeholder="#{placeholder.comment}"></textarea>
-        </div>
-        <button type="submit" th:text="#{label.addComment}">Надіслати коментар</button>
-    </form>
+    <div sec:authorize="isAuthenticated()">
+        <h3 th:text="#{title.addComment}">Додати коментар</h3>
+        <form th:action="@{/comments}" method="post">
+            <input type="hidden" name="bookId" th:value="${book.id}">
+
+            <div class="form-group">
+                <label>Ви коментуєте як: <strong th:text="${currentUserNickname}">Нікнейм</strong></label>
+                <input type="hidden" name="author" th:value="${#authentication.name}">
+            </div>
+
+            <div class="form-group">
+                <label th:text="#{label.commentText}">Коментар:</label>
+                <textarea name="text" class="styled-input" required th:placeholder="#{placeholder.comment}"></textarea>
+            </div>
+            <button type="submit" th:text="#{label.addComment}">Надіслати коментар</button>
+        </form>
+    </div>
+
+    <div sec:authorize="isAnonymous()">
+        <p>Щоб залишити коментар, будь ласка, <a th:href="@{/login}">увійдіть</a>.</p>
+    </div>
 
     <a th:href="@{/books}" class="back-btn" th:text="#{label.backToList}">← Назад до списку</a>
 </div>

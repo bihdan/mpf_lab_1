@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header}">
+    <meta charset="UTF-8">
+    <title>Коментарі користувача</title>
+</head>
+<style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; margin: 0; padding: 40px; display: flex; flex-direction: column; align-items: center; }
+
+    .container { width: 100%; max-width: 800px; background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+
+    h1 { color: #2c3e50; margin-bottom: 10px; font-size: 2em; }
+
+    .back-btn {
+        display: inline-block; margin-bottom: 30px; text-decoration: none; color: #3498db;
+        font-weight: bold; padding: 10px 20px; border: 2px solid #3498db; border-radius: 8px; transition: 0.3s;
+    }
+    .back-btn:hover { background-color: #3498db; color: white; }
+
+    hr { border: 0; height: 1px; background: #eee; margin: 25px 0; }
+
+    .comment-item { background: #fdfdfd; border-left: 5px solid #3498db; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .date { color: #95a5a6; font-size: 0.85em; font-weight: bold; margin-bottom: 10px; display: block; }
+
+    .comment-text { font-size: 1.1em; color: #34495e; margin: 10px 0; }
+
+    .book-info { margin-top: 15px; padding-top: 10px; border-top: 1px dashed #eee; font-size: 0.95em; }
+    .book-link { color: #3498db; text-decoration: none; font-weight: bold; }
+    .book-link:hover { text-decoration: underline; }
+
+    .empty-msg { text-align: center; color: #7f8c8d; font-style: italic; margin-top: 40px; }
+</style>
+<body>
+
+<div class="container">
+    <h1>Коментарі користувача: <span th:text="${username}" style="color: #3498db;">Ім'я</span></h1>
+
+    <a href="/books" class="back-btn">← Повернутися до бібліотеки</a>
+
+    <hr>
+
+    <div th:if="${not #lists.isEmpty(comments)}">
+        <div th:each="c : ${comments}" class="comment-item">
+            <span class="date">Опубліковано: <span th:text="${#temporals.format(c.createdAt, 'dd.MM.yyyy HH:mm')}">2026-01-01</span></span>
+
+            <p class="comment-text" th:text="${c.text}">Текст коментаря...</p>
+
+            <div class="book-info">
+                <strong>Книга:</strong>
+                <a class="book-link" th:href="@{/books/{id}(id=${c.book.id})}"
+                   th:text="${c.book.title}">Назва книги</a>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${#lists.isEmpty(comments)}" class="empty-msg">
+        <p>Цей користувач ще не залишив жодного відгуку.</p>
+    </div>
+</div>
+
+</body>
+</html>

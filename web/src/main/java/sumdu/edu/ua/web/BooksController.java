@@ -1,5 +1,6 @@
 package sumdu.edu.ua.web;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +28,8 @@ public class BooksController {
             @RequestParam(value = "page", defaultValue = "0") int page,
             Model model) {
 
-        var booksPage = bookRepo.search(q, new PageRequest(page, 20, sortBy));
+        String sortProperty = "pub_year".equals(sortBy) ? "pubYear" : sortBy;
+        var booksPage = bookRepo.search(q, new PageRequest(page, 20, sortProperty));
 
         model.addAttribute("books", booksPage.getItems());
         model.addAttribute("query", q != null ? q : "");
@@ -38,7 +40,6 @@ public class BooksController {
         return "books";
     }
 
-    // Решта методів (findById, showAddForm, addBook) залишаються без змін
     @GetMapping("/{id}")
     public String getBookDetails(@PathVariable("id") Long id, Model model) {
         Book book = bookRepo.findById(id);
@@ -49,7 +50,13 @@ public class BooksController {
         var comments = commentRepo.list(id, null, null, new PageRequest(0, 100, "id")).getItems();
         model.addAttribute("book", book);
         model.addAttribute("comments", comments);
-        return "book-details";
+        return "book-comments";
     }
 
+    @PostMapping("/{id}/delete")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String deleteBook(@PathVariable("id") Long id) {
+        bookRepo.delete(id);
+        return "redirect:/books";
+    }
 }
