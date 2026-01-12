@@ -1,9 +1,9 @@
 package sumdu.edu.ua.web;
 
-import io.javalin.Javalin;
-import io.javalin.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 import sumdu.edu.ua.core.domain.Book;
 import sumdu.edu.ua.core.domain.Page;
 import sumdu.edu.ua.core.domain.PageRequest;
@@ -12,6 +12,8 @@ import sumdu.edu.ua.core.port.CommentRepositoryPort;
 
 import java.util.Map;
 
+@RestController
+@RequestMapping("/api")
 public class BooksApiController {
     private static final Logger log = LoggerFactory.getLogger(BooksApiController.class);
     private final CatalogRepositoryPort bookRepo;
@@ -22,74 +24,64 @@ public class BooksApiController {
         this.commentRepo = commentRepo;
     }
 
-    public void registerRoutes(Javalin app) {
+    // GET /api/books — Пошук та сортування книг
+    @GetMapping("/books")
+    public Page<Book> searchBooks(
+            @RequestParam(value = "q", required = false) String q,
+            @RequestParam(value = "sortBy", defaultValue = "id") String sortBy,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "20") int size) {
 
-        // GET /api/books — Пошук та сортування
-        app.get("/api/books", ctx -> {
-            try {
-                String q = ctx.queryParam("q");
-                String sortBy = ctx.queryParamAsClass("sortBy", String.class).getOrDefault("id");
-                int page = ctx.queryParamAsClass("page", Integer.class).getOrDefault(0);
-                int size = ctx.queryParamAsClass("size", Integer.class).getOrDefault(20);
+        return bookRepo.search(q, new PageRequest(page, size, sortBy));
+    }
 
-                Page<Book> result = bookRepo.search(q, new PageRequest(page, size, sortBy));
-                ctx.json(result);
-            } catch (Exception e) {
-                log.error("Помилка API при отриманні книг", e);
-                ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        });
+    // GET /api/books/{id} — Дані для детальної інформації та коментарів
+    @GetMapping("/books/{id}")
+    public Map<String, Object> getBookWithComments(@PathVariable("id") Long id) {
+        Book book = bookRepo.findById(id);
+        if (book == null) {
+            throw new RuntimeException("Book not found");
+        }
+        var commentsPage = commentRepo.list(id, null, null, new PageRequest(0, 100, "id"));
 
-        // GET /api/books/{id} — Дані для сторінки коментарів
-        app.get("/api/books/{id}", ctx -> {
-            try {
-                long id = ctx.pathParamAsClass("id", Long.class).get();
-                Book book = bookRepo.findById(id);
-                var commentsPage = commentRepo.list(id, null, null, new PageRequest(0, 100, "id"));
-                ctx.json(Map.of("book", book, "comments", commentsPage.getItems()));
-            } catch (Exception e) {
-                ctx.status(HttpStatus.NOT_FOUND);
-            }
-        });
+        return Map.of(
+                "book", book,
+                "comments", commentsPage.getItems()
+        );
+    }
 
-        // POST /api/comments — Додавання коментаря
-        app.post("/api/comments", ctx -> {
-            try {
-                var body = ctx.bodyAsClass(Map.class);
-                long bookId = Long.parseLong(body.get("bookId").toString());
-                String author = (String) body.get("author");
-                String text = (String) body.get("text");
+    // POST /api/comments — Додавання нового коментаря
+    @PostMapping("/comments")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void addComment(@RequestBody Map<String, Object> body) {
+        try {
+            long bookId = Long.parseLong(body.get("bookId").toString());
+            String author = (String) body.get("author");
+            String text = (String) body.get("text");
 
-                commentRepo.add(bookId, author, text);
-                ctx.status(HttpStatus.CREATED);
-            } catch (Exception e) {
-                ctx.status(HttpStatus.BAD_REQUEST);
-            }
-        });
+            commentRepo.add(bookId, author, text);
+        } catch (Exception e) {
+            log.error("Помилка при додаванні коментаря через API", e);
+            throw e;
+        }
+    }
 
-        // DELETE /api/comments/{id} — Видалення коментаря
-        app.delete("/api/comments/{id}", ctx -> {
-            try {
-                long id = ctx.pathParamAsClass("id", Long.class).get();
-                // Викликаємо метод delete з порту. bookId можна передати 0,
-                // якщо логіка репозиторію дозволяє видалення тільки за id коментаря
-                commentRepo.delete(0, id);
-                ctx.status(HttpStatus.NO_CONTENT);
-            } catch (Exception e) {
-                log.error("Помилка при видаленні коментаря", e);
-                ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        });
+    // DELETE /api/comments/{id} — Видалення коментаря
+    @DeleteMapping("/comments/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT) // Встановлює статус 204
+    public void deleteComment(@PathVariable("id") Long id) {
+        try {
+            commentRepo.delete(0, id);
+        } catch (Exception e) {
+            log.error("Помилка при видаленні коментаря", e);
+            throw e;
+        }
+    }
 
-        // POST /api/books — Додавання нової книги
-        app.post("/api/books", ctx -> {
-            try {
-                Book book = ctx.bodyAsClass(Book.class);
-                Book saved = bookRepo.add(book.getTitle(), book.getAuthor(), book.getPubYear());
-                ctx.status(HttpStatus.CREATED).json(saved);
-            } catch (Exception e) {
-                ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        });
+    // POST /api/books — Реєстрація нової книги
+    @PostMapping("/books")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Book createBook(@RequestBody Book book) {
+        return bookRepo.add(book.getTitle(), book.getAuthor(), book.getPubYear());
     }
 }

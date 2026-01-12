@@ -1,0 +1,43 @@
+<div th:fragment="header" xmlns:th="http://www.thymeleaf.org">
+    <meta charset="UTF-8">
+    <title>MPF Library</title>
+    <style>
+        .nav-header {
+            background: #fff;
+            padding: 15px 0;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        .nav-header a {
+            text-decoration: none;
+            color: #3498db;
+            font-weight: bold;
+            padding: 5px 12px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        .nav-header a:hover {
+            background: #ebf5fb;
+            color: #2980b9;
+        }
+        .nav-divider {
+            color: #ddd;
+            margin: 0 5px;
+        }
+        hr {
+            border: 0;
+            border-top: 1px solid #eee;
+            margin: 20px 0;
+        }
+    </style>
+
+    <nav class="nav-header">
+        <a th:href="@{/books}" th:text="#{title.books}">Books</a>
+        <span class="nav-divider">|</span>
+
+        <a th:href="${urlBuilder.cloneBuilder().replaceQueryParam('lang', 'uk').build().toUriString()}">UA</a>
+        <a th:href="${urlBuilder.cloneBuilder().replaceQueryParam('lang', 'en').build().toUriString()}">EN</a>
+        <a th:href="${urlBuilder.cloneBuilder().replaceQueryParam('lang', 'fr').build().toUriString()}">FR</a>
+    </nav>
+</div>

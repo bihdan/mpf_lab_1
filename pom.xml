@@ -21,7 +21,6 @@
         <module>core</module>
         <module>persistence</module>
         <module>web</module>
-        <module>infrastructure</module>
     </modules>
 
     <properties>

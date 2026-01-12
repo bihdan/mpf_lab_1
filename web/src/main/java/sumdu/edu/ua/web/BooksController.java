@@ -1,14 +1,15 @@
 package sumdu.edu.ua.web;
 
-import io.javalin.Javalin;
-import io.javalin.http.HttpStatus;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 import sumdu.edu.ua.core.domain.Book;
 import sumdu.edu.ua.core.domain.PageRequest;
 import sumdu.edu.ua.core.port.CatalogRepositoryPort;
 import sumdu.edu.ua.core.port.CommentRepositoryPort;
 
-import java.util.Map;
-
+@Controller
+@RequestMapping("/books")
 public class BooksController {
 
     private final CatalogRepositoryPort bookRepo;
@@ -19,39 +20,49 @@ public class BooksController {
         this.commentRepo = commentRepo;
     }
 
-    public void registerRoutes(Javalin app) {
+    @GetMapping
+    public String getAllBooks(
+            @RequestParam(value = "q", required = false) String q,
+            @RequestParam(value = "sortBy", defaultValue = "id") String sortBy,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            Model model) {
 
-        // GET /books — перегляд списку книг на сторінці
-        app.get("/books", ctx -> {
-            String q = ctx.queryParam("q");
-            String sortBy = ctx.queryParamAsClass("sortBy", String.class).getOrDefault("id");
-            int page = ctx.queryParamAsClass("page", Integer.class).getOrDefault(0);
+        // Використовуємо PageRequest для пошуку та сортування
+        var booksPage = bookRepo.search(q, new PageRequest(page, 20, sortBy));
 
-            var booksPage = bookRepo.search(q, new PageRequest(page, 20, sortBy));
+        // Передаємо дані та стан фільтрів назад у шаблон
+        model.addAttribute("books", booksPage.getItems());
+        model.addAttribute("query", q != null ? q : "");
+        model.addAttribute("sortBy", sortBy); // Щоб зберегти вибір у <select>
+        model.addAttribute("total", booksPage.getTotal()); // Для пагінації
+        model.addAttribute("currentPage", page); // Для підсвічування сторінки
 
-            ctx.render("books.jsp", Map.of(
-                    "books", booksPage.getItems(),
-                    "query", q != null ? q : ""
-            ));
-        });
+        return "books";
+    }
 
-        // GET /books/{id} — детальна сторінка книги
-        app.get("/books/{id}", ctx -> {
-            long id = ctx.pathParamAsClass("id", Long.class).get();
+    // Решта методів (findById, showAddForm, addBook) залишаються без змін
+    @GetMapping("/{id}")
+    public String getBookDetails(@PathVariable("id") Long id, Model model) {
+        Book book = bookRepo.findById(id);
+        if (book == null) {
+            model.addAttribute("message", "Книгу не знайдено");
+            return "error";
+        }
+        var comments = commentRepo.list(id, null, null, new PageRequest(0, 100, "id")).getItems();
+        model.addAttribute("book", book);
+        model.addAttribute("comments", comments);
+        return "book-details";
+    }
 
-            Book book = bookRepo.findById(id);
-            if (book == null) {
-                ctx.status(HttpStatus.NOT_FOUND);
-                ctx.render("error.jsp", Map.of("message", "Книгу не знайдено"));
-                return;
-            }
+    @GetMapping("/new")
+    public String showAddForm(Model model) {
+        model.addAttribute("bookForm", new Book());
+        return "book-add";
+    }
 
-            var comments = commentRepo.list(id, null, null, new PageRequest(0, 100, "id")).getItems();
-
-            ctx.render("book-details.jsp", Map.of(
-                    "book", book,
-                    "comments", comments
-            ));
-        });
+    @PostMapping
+    public String addBook(@ModelAttribute("bookForm") Book book) {
+        bookRepo.add(book.getTitle(), book.getAuthor(), book.getPubYear());
+        return "redirect:/books";
     }
 }
