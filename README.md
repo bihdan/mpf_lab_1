@@ -41,7 +41,7 @@
  **Скріншот №1:**  
 _Інтерфейс каталогу книг_  
 
-<img width="1058" height="807" alt="Каталог книг" src="https://github.com/user-attachments/assets/610865e7-53d7-49ff-805e-c0158f1a8be1" />
+<img width="1248" height="459" alt="Screenshot_15" src="https://github.com/user-attachments/assets/d5fc593c-002d-4134-9b54-05d7e4044eac" />
 
 ---
 
@@ -52,7 +52,7 @@ _Інтерфейс каталогу книг_
  **Скріншот №2:**  
 _Сторінка книги з успішно доданим відгуком_  
 
-<img width="1132" height="969" alt="image_2025-12-30_23-22-56" src="https://github.com/user-attachments/assets/32cea3aa-3d2d-4bce-9095-effb4696d78d" />
+<img width="871" height="900" alt="Screenshot_17" src="https://github.com/user-attachments/assets/f7b5f4d7-a0ce-4394-9176-cc2217717265" />
 
 
 ---
@@ -92,12 +92,12 @@ _Результати виконання ArchUnit-тестів_
  **Скріншот №5:**  
 _Логи успішних операцій (INFO)_  
 
-<img width="1753" height="243" src="https://github.com/user-attachments/assets/d8e9dbd7-6453-4292-a6e7-b7441f201000" />
+<img width="1349" height="320" alt="Screenshot_19" src="https://github.com/user-attachments/assets/872e549e-908b-4b20-9d74-c919a434fcd1" />
 
  **Скріншот №6:**  
 _Логи помилок (WARN / ERROR)_  
 
-<img width="1705" height="68" src="https://github.com/user-attachments/assets/58e56f25-5ef0-41c3-a4d5-ebef71ea2900" />
+<img width="1576" height="99" alt="Screenshot_20" src="https://github.com/user-attachments/assets/4067789d-5734-45b1-a485-295a94c6c5ff" />
 
 ---
 
